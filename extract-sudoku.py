@@ -32,6 +32,44 @@ print("Selected file:", IMAGE)
 
 OUTPUT = "cells"
 
+def check_duplicates(game):
+    errors = []
+
+    # Rows
+    for r in range(9):
+        values = [v for v in game[r] if v != 0]
+        if len(values) != len(set(values)):
+            errors.append(f"duplicate in row {r + 1}")
+
+    # Columns
+    for c in range(9):
+        values = [
+            game[r][c]
+            for r in range(9)
+            if game[r][c] != 0
+        ]
+        if len(values) != len(set(values)):
+            errors.append(f"duplicate in column {c + 1}")
+
+    # 3x3 boxes
+    for br in range(0, 9, 3):
+        for bc in range(0, 9, 3):
+            values = []
+
+            for r in range(br, br + 3):
+                for c in range(bc, bc + 3):
+                    if game[r][c] != 0:
+                        values.append(game[r][c])
+
+            if len(values) != len(set(values)):
+                errors.append(
+                    f"duplicate in box "
+                    f"r{br + 1}-{br + 3}, "
+                    f"c{bc + 1}-{bc + 3}"
+                )
+
+    return errors
+
 def load_training():
 
     samples = []
@@ -282,6 +320,13 @@ for row in range(9):
                 f"d={second_distance:.0f} "
                 f"ratio={distance/second_distance:.3f}"
             )
+            if distance > 20_000_000:
+                print(
+                    f"WARNING r{row+1}c{col+1}: "
+                    f"uncertain recognition "
+                    f"{value}, distance={distance:.0f}, "
+                    f"ratio={distance/second_distance:.3f}"
+                )            
             cv2.imwrite(
                 f"digits/r{row+1}c{col+1}.png",
                 digit
@@ -305,6 +350,11 @@ for row in range(9):
         linear += str(game[row][col]);
 
 print(linear)
+
+errors = check_duplicates(game)
+
+for error in errors:
+    print("WARNING:", error)
 
 gfile = os.path.splitext(IMAGE)[0] + ".game"
 path = f"../games/{gfile}"
