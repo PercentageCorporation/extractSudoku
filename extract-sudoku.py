@@ -292,7 +292,7 @@ for row in range(9):
             # Large game digit rather than candidate
             if (
                 h >= ih * 0.30 and
-                w >= iw * 0.20
+                w >= iw * 0.08
             ):
                 large_component = (
                     x, y, w, h, area
